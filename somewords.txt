@@ -1,0 +1,10 @@
+apple
+banana
+cherry
+dog
+egg
+ferry
+good
+hot
+igloo
+jam
