@@ -107,12 +107,78 @@ public class PoetryBot
 		
 		BitSet[] lines = getLines(linePicker, hashBits);
 		
+		// THE MAGIC
 		for(BitSet bs : lines)
 		{
-			
+			System.out.println(makeLine(wordIndex, bs));
 		}
 	}
 	
+	public String makeLine(int keywordIndex, BitSet bs)
+	{
+		String returnVal = "";
+		
+		int numWords = getIntegerFromBitset(bs.get(0, 4));
+		
+		if(numWords > 2)
+		{
+			numWords = 2;
+		}
+		
+		int[] fbw = new int[14];
+		
+		fbw[ 0] = getIntegerFromBitset(bs.get( 4,  8));
+		fbw[ 1] = getIntegerFromBitset(bs.get( 8, 12));
+		fbw[ 2] = getIntegerFromBitset(bs.get(12, 16));
+		fbw[ 3] = getIntegerFromBitset(bs.get(16, 20));
+		fbw[ 4] = getIntegerFromBitset(bs.get( 1,  5));
+		fbw[ 5] = getIntegerFromBitset(bs.get( 5,  9));
+		fbw[ 6] = getIntegerFromBitset(bs.get( 9, 13));
+		fbw[ 7] = getIntegerFromBitset(bs.get(13, 17));
+		fbw[ 8] = getIntegerFromBitset(bs.get(17, 21));
+		fbw[ 9] = getIntegerFromBitset(bs.get( 2,  6));
+		fbw[10] = getIntegerFromBitset(bs.get( 6, 10));
+		fbw[11] = getIntegerFromBitset(bs.get(10, 14));
+		fbw[12] = getIntegerFromBitset(bs.get(14, 18));
+		fbw[13] = getIntegerFromBitset(bs.get(18, 22));
+		
+		String[] fbs = new String[14];
+		
+		int sum = 0;
+		
+		for(int index = 0; index < 14; ++ index)
+		{
+			sum += fbw[index];
+			
+			fbs[index] = wordList[keywordIndex + sum];
+			
+			if(fbw[index] == 0)
+			{
+				fbs[index] = wordList[keywordIndex];
+			}
+		}
+		
+		for(int index = 0; index < numWords; ++ index)
+		{
+			returnVal += fbs[index] + " ";
+		}
+		
+		return returnVal;
+	}
+
+	public static int getIntegerFromBitset(BitSet bs)
+	{
+		int returnVal = 0;
+		for (int i = 0; i < 32; i++)
+		{
+			if(bs.get(i))
+			{
+				returnVal |= (1 << i);
+			}
+		}
+		return returnVal;
+	}
+
 	public static int generateWordIndex(String input)
 	{
 		int wordIndex = 1;
