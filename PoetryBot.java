@@ -1,6 +1,7 @@
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.BitSet;
 import java.util.Scanner;
 
 public class PoetryBot
@@ -25,15 +26,29 @@ public class PoetryBot
 		
 		byte[] hash = getSHA512(input);
 		
-		for(byte b : hash)
-		{
-			System.out.println(b);
-		}
+		BitSet foo = getBits(hash);
+		
+		printBitSet(foo);
 		
 		listener.close();
 	}
 	
-	private byte[] getSHA512(String input)
+	private static void printBitSet(BitSet b)
+	{
+		for(int i = 0; i < 512; ++ i)
+		{
+			if(b.get(i))
+			{
+				System.out.print("1");
+			}
+			else
+			{
+				System.out.print("0");
+			}
+		}
+	}
+	
+	private static byte[] getSHA512(String input)
 	{
 		MessageDigest sHAer = null;
 		byte[] hash = null;
@@ -48,6 +63,13 @@ public class PoetryBot
 		}
 		catch (UnsupportedEncodingException e) { e.printStackTrace(); }
 		return hash;
+	}
+	
+	private static BitSet getBits(byte[] bytes)
+	{
+		BitSet returnVal = BitSet.valueOf(bytes);
+		
+		return returnVal;
 	}
 
 	public static void main(String[] args)
