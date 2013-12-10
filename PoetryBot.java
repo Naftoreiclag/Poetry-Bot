@@ -10,8 +10,6 @@ public class PoetryBot
 
 	private void run()
 	{
-		Scanner listener = new Scanner(System.in);
-
 		System.out.println("Hello! I am Poetry Bot.");
 		
 		System.out.println("I am poetry bot #" + POETRYBOTVERSION);
@@ -19,23 +17,63 @@ public class PoetryBot
 		System.out.println();
 
 		System.out.print("What would you like me to write about? ");
+		Scanner listener = new Scanner(System.in);
 		String input = listener.nextLine();
+		listener.close();
 		System.out.println();
 		
 		System.out.println("I will write about " + '"' + input + '"' + ".");
 		
 		byte[] hash = getSHA512(input);
 		
-		BitSet foo = getBits(hash);
+		BitSet hashBits = getBits(hash);
+		printBitSet(hashBits);
 		
-		printBitSet(foo);
+		BitSet lineChooser = hashBits.get(0, 23);
+
+		System.out.println("What would you like me to write about? ");
+		printBitSet(lineChooser);
+		System.out.println("What would you like me to write about? ");
 		
-		listener.close();
+		BitSet[] lines = getLines(lineChooser, hashBits);
+		
+		for(BitSet bs : lines)
+		{
+			printBitSet(bs);
+		}
+	}
+	
+	private static BitSet[] getLines(BitSet lineChooser, BitSet hashBits)
+	{
+		int numLines = 0;
+		
+		for(int lineBitIndex = 0; lineBitIndex < 22; ++ lineBitIndex)
+		{
+			if(lineChooser.get(lineBitIndex))
+			{
+				++ numLines;
+			}
+		}
+		
+		BitSet[] returnVal = new BitSet[numLines];
+		
+		int currentSpot = 0;
+		for(int lineBitIndex = 0; lineBitIndex < 22; ++ lineBitIndex)
+		{
+			if(lineChooser.get(lineBitIndex))
+			{
+				returnVal[currentSpot] = hashBits.get(lineBitIndex * 22, (lineBitIndex * 22) + 23);
+				
+				++ currentSpot;
+			}
+		}
+		
+		return returnVal;
 	}
 	
 	private static void printBitSet(BitSet b)
 	{
-		for(int i = 0; i < 512; ++ i)
+		for(int i = 0; i < b.length(); ++ i)
 		{
 			if(b.get(i))
 			{
@@ -43,9 +81,10 @@ public class PoetryBot
 			}
 			else
 			{
-				System.out.print("0");
+				System.out.print(".");
 			}
 		}
+		System.out.println();
 	}
 	
 	private static byte[] getSHA512(String input)
