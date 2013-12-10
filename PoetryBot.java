@@ -1,3 +1,14 @@
+/* Copyright (c) 2013 "Naftoreiclag" https://github.com/Naftoreiclag
+ *
+ * Distributed under the MIT License (http://opensource.org/licenses/mit-license.html)
+ * See accompanying file LICENSE
+ */
+
+package foo;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -7,15 +18,53 @@ import java.util.Scanner;
 public class PoetryBot
 {
 	public static int POETRYBOTVERSION = 1;
+	
+	public void loadWords()
+	{
+		System.out.println("Begin loading words...");
 
-	private void run()
+		BufferedReader reader = null;
+
+		try
+		{
+			String currentLine;
+
+			reader = new BufferedReader(new FileReader("testfile.txt"));
+
+			while((currentLine = reader.readLine()) != null)
+			{
+				System.out.println(currentLine);
+			}
+
+		}
+		catch(IOException e) { e.printStackTrace(); }
+		finally
+		{
+			try
+			{
+				if(reader != null)
+				{
+					reader.close();
+				}
+			}
+			catch(IOException e)
+			{
+				e.printStackTrace();
+			}
+		}
+		
+		System.out.println("Done!");
+	}
+	
+	public void sayHello()
 	{
 		System.out.println("Hello! I am Poetry Bot.");
-		
 		System.out.println("I am poetry bot #" + POETRYBOTVERSION);
-		
 		System.out.println();
+	}
 
+	public void writePoem()
+	{
 		System.out.print("What would you like me to write about? ");
 		Scanner listener = new Scanner(System.in);
 		String input = listener.nextLine();
@@ -27,19 +76,14 @@ public class PoetryBot
 		byte[] hash = getSHA512(input);
 		
 		BitSet hashBits = getBits(hash);
-		printBitSet(hashBits);
 		
-		BitSet lineChooser = hashBits.get(0, 23);
-
-		System.out.println("What would you like me to write about? ");
-		printBitSet(lineChooser);
-		System.out.println("What would you like me to write about? ");
+		BitSet linePicker = hashBits.get(0, 22);
 		
-		BitSet[] lines = getLines(lineChooser, hashBits);
+		BitSet[] lines = getLines(linePicker, hashBits);
 		
 		for(BitSet bs : lines)
 		{
-			printBitSet(bs);
+			
 		}
 	}
 	
@@ -62,7 +106,9 @@ public class PoetryBot
 		{
 			if(lineChooser.get(lineBitIndex))
 			{
-				returnVal[currentSpot] = hashBits.get(lineBitIndex * 22, (lineBitIndex * 22) + 23);
+				int spot = (lineBitIndex * 22) + 22;
+				
+				returnVal[currentSpot] = hashBits.get(spot, spot + 22);
 				
 				++ currentSpot;
 			}
@@ -71,9 +117,9 @@ public class PoetryBot
 		return returnVal;
 	}
 	
-	private static void printBitSet(BitSet b)
+	private static void printBitSet(BitSet b, int length)
 	{
-		for(int i = 0; i < b.length(); ++ i)
+		for(int i = 0; i < length; ++ i)
 		{
 			if(b.get(i))
 			{
@@ -110,10 +156,12 @@ public class PoetryBot
 		
 		return returnVal;
 	}
-
+	
 	public static void main(String[] args)
 	{
 		PoetryBot pb = new PoetryBot();
-		pb.run();
+		pb.sayHello();
+		pb.loadWords();
+		pb.writePoem();
 	}
 }
