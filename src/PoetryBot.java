@@ -25,7 +25,7 @@ public class PoetryBot
 {
 	public static String[] wordList;
 	
-	public static int POETRYBOTVERSION = 1;
+	public static int POETRYBOTVERSION = 2;
 	public static String WORDLISTFILENAME = "brit-shuffle1.txt";
 	
 	public static void loadWords()
@@ -90,20 +90,22 @@ public class PoetryBot
 		
 		int wordIndex = getWordIndex(input);
 		
-		byte[] hash = getSHA512(input);
+		byte[] hash = getSHA256(input);
 		
 		if(wordIndex == -1)
 		{
-			System.out.println("I don't know what a " + '"' + input + '"' + " is, but I'll try my best.");
+			//System.out.println("I don't know what a " + '"' + input + '"' + " is, but I'll try my best.");
+			System.out.println("I don't know what a " + '"' + input + '"' + " is, sorry!");
 			
 			wordIndex = generateWordIndex(input);
+			return;
 		}
 		
 		System.out.println("Word index: " + wordIndex);
 		
 		BitSet hashBits = getBits(hash);
 		
-		BitSet linePicker = hashBits.get(0, 22);
+		BitSet linePicker = hashBits.get(0, 16);
 		
 		BitSet[] lines = getLines(linePicker, hashBits);
 		
@@ -116,52 +118,25 @@ public class PoetryBot
 	
 	public String makeLine(int keywordIndex, BitSet bs)
 	{
-		String returnVal = "";
+		String returnVal = "+" + wordList[keywordIndex];
 		
-		int numWords = getIntegerFromBitset(bs.get(0, 4));
+		int numWordsToAdd = getIntegerFromBitset(bs.get(0, 2)) + 1;
 		
-		if(numWords > 2)
+		int[] wordIndexOffsets = new int[numWordsToAdd];
+		
+		int total = 1;
+		for(int spot = 0; spot < numWordsToAdd; ++ spot)
 		{
-			numWords = 2;
-		}
-		
-		int[] fbw = new int[14];
-		
-		fbw[ 0] = getIntegerFromBitset(bs.get( 4,  8));
-		fbw[ 1] = getIntegerFromBitset(bs.get( 8, 12));
-		fbw[ 2] = getIntegerFromBitset(bs.get(12, 16));
-		fbw[ 3] = getIntegerFromBitset(bs.get(16, 20));
-		fbw[ 4] = getIntegerFromBitset(bs.get( 1,  5));
-		fbw[ 5] = getIntegerFromBitset(bs.get( 5,  9));
-		fbw[ 6] = getIntegerFromBitset(bs.get( 9, 13));
-		fbw[ 7] = getIntegerFromBitset(bs.get(13, 17));
-		fbw[ 8] = getIntegerFromBitset(bs.get(17, 21));
-		fbw[ 9] = getIntegerFromBitset(bs.get( 2,  6));
-		fbw[10] = getIntegerFromBitset(bs.get( 6, 10));
-		fbw[11] = getIntegerFromBitset(bs.get(10, 14));
-		fbw[12] = getIntegerFromBitset(bs.get(14, 18));
-		fbw[13] = getIntegerFromBitset(bs.get(18, 22));
-		
-		String[] fbs = new String[14];
-		
-		int sum = 0;
-		
-		for(int index = 0; index < 14; ++ index)
-		{
-			sum += fbw[index];
+			int number = getIntegerFromBitset(bs.get((spot * 4), (spot * 4) + 4));
 			
-			fbs[index] = wordList[keywordIndex + sum];
+			total += number;
 			
-			if(fbw[index] == 0)
-			{
-				fbs[index] = wordList[keywordIndex];
-			}
+			wordIndexOffsets[spot] = total;
+			
+			returnVal += " " + wordList[keywordIndex + total];
 		}
 		
-		for(int index = 0; index < numWords; ++ index)
-		{
-			returnVal += fbs[index] + " ";
-		}
+		
 		
 		return returnVal;
 	}
@@ -209,7 +184,7 @@ public class PoetryBot
 	{
 		int numLines = 0;
 		
-		for(int lineBitIndex = 0; lineBitIndex < 22; ++ lineBitIndex)
+		for(int lineBitIndex = 0; lineBitIndex < 15; ++ lineBitIndex)
 		{
 			if(lineChooser.get(lineBitIndex))
 			{
@@ -220,13 +195,13 @@ public class PoetryBot
 		BitSet[] returnVal = new BitSet[numLines];
 		
 		int currentSpot = 0;
-		for(int lineBitIndex = 0; lineBitIndex < 22; ++ lineBitIndex)
+		for(int lineBitIndex = 0; lineBitIndex < 15; ++ lineBitIndex)
 		{
 			if(lineChooser.get(lineBitIndex))
 			{
-				int spot = (lineBitIndex * 22) + 22;
+				int spot = (lineBitIndex * 16) + 16;
 				
-				returnVal[currentSpot] = hashBits.get(spot, spot + 22);
+				returnVal[currentSpot] = hashBits.get(spot, spot + 16);
 				
 				++ currentSpot;
 			}
@@ -251,13 +226,13 @@ public class PoetryBot
 		System.out.println();
 	}
 	
-	private static byte[] getSHA512(String input)
+	private static byte[] getSHA256(String input)
 	{
 		MessageDigest sHAer = null;
 		byte[] hash = null;
 		try
 		{
-			sHAer = MessageDigest.getInstance("SHA-512");
+			sHAer = MessageDigest.getInstance("SHA-256");
 		}
 		catch (NoSuchAlgorithmException e1) { e1.printStackTrace(); }
 		try
