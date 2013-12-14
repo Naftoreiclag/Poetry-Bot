@@ -8,3 +8,7 @@ The license for that file reads:
 >All rights are reserved.
 
 So, yeah.
+
+Also, it uses stuff from the Google Web Search API.
+These are the terms of service: https://developers.google.com/web-search/terms
+Looks good to me.
